@@ -1,0 +1,30 @@
+{
+  "Assets": [
+    {
+      "Symbol": "AUD",
+      "SecType": "CASH",
+      "Exchange": "IDEALPRO",
+      "Currency": "USD",
+
+      "LowStoploss": 0.7360,
+      "HighStoploss": 0.7802,
+      "LowTakeprofit": 0.75,
+      "HighTakeprofit": 0.7650,
+      "Close": 0.7575,
+      "MaxPositionSize": 30000
+    },
+    {
+      "Symbol": "EUR",
+      "SecType": "CASH",
+      "Exchange": "IDEALPRO",
+      "Currency": "USD",
+
+      "LowStoploss": 1.1100,
+      "HighStoploss": 1.1150,
+      "LowTakeprofit": 1.1200,
+      "HighTakeprofit": 1.1140,
+      "Close": 1.1130,
+      "MaxPositionSize": 30000
+    }
+  ]
+}

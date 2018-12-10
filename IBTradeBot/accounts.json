@@ -1,0 +1,9 @@
+{
+  "Accounts": [
+    {
+      "Account": "US12345",
+      "BaseCurrency": "USD",
+      "MaxTotalPositionSize": 60000
+    }
+  ]
+}
