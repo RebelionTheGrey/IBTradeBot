@@ -159,20 +159,29 @@ namespace IBTradeBot
                 foreach (var accountData in positions)
                 {
                     var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered; 
-                    var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract; 
+                    var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
 
-                    if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize)
+                    foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
                     {
-                        List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
+                        if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize)
+                        {
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
+                            bracket.ForEach(item => item.Account = clientAccount);
+    
                         foreach (var elem in bracket)
-                            clientSocket.placeOrder(elem.OrderId, contract, elem);
-                    }
-                    
-                    if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize)
-                    {
-                        List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
-                        foreach (var elem in bracket)
-                            clientSocket.placeOrder(elem.OrderId, contract, elem);
+                                clientSocket.placeOrder(elem.OrderId, contract, elem);
+                        }
+
+                        if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize)
+                        {
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
+                            bracket.ForEach(item => item.Account = clientAccount);
+
+                            foreach (var elem in bracket)
+                                clientSocket.placeOrder(elem.OrderId, contract, elem);
+
+
+                        }
                     }
                 }
             }
