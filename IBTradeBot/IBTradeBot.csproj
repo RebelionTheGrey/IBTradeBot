@@ -82,7 +82,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties assets_1json__JSONSchema="http://json.schemastore.org/appsettings" accounts_1json__JSONSchema="http://json.schemastore.org/appsettings" />
+      <UserProperties accounts_1json__JSONSchema="http://json.schemastore.org/appsettings" assets_1json__JSONSchema="http://json.schemastore.org/circleciconfig" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

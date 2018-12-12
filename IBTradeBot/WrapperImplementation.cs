@@ -146,7 +146,7 @@ namespace IBTradeBot
                             var currentOrdered = positionInAccount[order.Value.Order.Account].ordered;
                             var currentOpened = positionInAccount[order.Value.Order.Account].opened;
 
-                            if (orderTypes.Contains(order.Value.OrderState.Status) && order.Value.OrderStatus != null) { currentOrdered += order.Value.OrderStatus.Remaining; }
+                            if (orderTypes.Contains(order.Value.OrderState.Status) && order.Value.OrderStatus != null && order.Value.Order.ParentId == 0) { currentOrdered += order.Value.OrderStatus.Remaining; }
 
                             positionInAccount[order.Value.Order.Account] = (currentOpened, currentOrdered);
                         }
@@ -158,18 +158,11 @@ namespace IBTradeBot
 
                 foreach (var accountData in positions)
                 {
-                    var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered;
-                    var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
+                    var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered; 
+                    var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract; 
 
                     if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize)
                     {
-                        //Thread.Sleep(100);
-
-                        /*order.Action = "SELL";
-                        order.TotalQuantity = asset.MaxPositionSize - Math.Abs(totalAssetPosition);*/
-
-                        //clientSocket.placeOrder(nextValidOrderId++, currentContract, order);
-
                         List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
                         foreach (var elem in bracket)
                             clientSocket.placeOrder(elem.OrderId, contract, elem);
@@ -177,13 +170,6 @@ namespace IBTradeBot
                     
                     if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize)
                     {
-                        //Thread.Sleep(100);
-
-                        /*order.Action = "BUY";
-                        order.TotalQuantity = asset.MaxPositionSize - Math.Abs(totalAssetPosition);*/
-
-                        //clientSocket.placeOrder(nextValidOrderId++, currentContract, order);
-
                         List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
                         foreach (var elem in bracket)
                             clientSocket.placeOrder(elem.OrderId, contract, elem);

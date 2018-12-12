@@ -1,30 +1,17 @@
 {
   "Assets": [
     {
-      "Symbol": "AUD",
+      "Symbol": "NZD",
       "SecType": "CASH",
       "Exchange": "IDEALPRO",
       "Currency": "USD",
 
-      "LowStoploss": 0.7360,
-      "HighStoploss": 0.7802,
-      "LowTakeprofit": 0.75,
-      "HighTakeprofit": 0.7650,
-      "Close": 0.7575,
-      "MaxPositionSize": 30000
-    },
-    {
-      "Symbol": "EUR",
-      "SecType": "CASH",
-      "Exchange": "IDEALPRO",
-      "Currency": "USD",
-
-      "LowStoploss": 1.1100,
-      "HighStoploss": 1.1150,
-      "LowTakeprofit": 1.1200,
-      "HighTakeprofit": 1.1140,
-      "Close": 1.1130,
-      "MaxPositionSize": 30000
+      "LowStoploss": 0.6790,
+      "HighStoploss": 0.6934,
+      "LowTakeprofit": 0.6815,
+      "HighTakeprofit": 0.6913,
+      "Close": 0.6888,
+      "MaxPositionSize": 10000
     }
   ]
 }
