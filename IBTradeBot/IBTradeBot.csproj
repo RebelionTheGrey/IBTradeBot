@@ -69,20 +69,19 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\TWS API\samples\CSharp\Testbed\Testbed.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\..\TWS API\samples\CSharp\Testbed\Testbed.csproj">
       <Project>{f54b4ad1-305e-4089-a1a0-fb9ee5a84040}</Project>
       <Name>Testbed</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\..\TWS API\source\CSharpClient\client\CSharpAPI.csproj">
+    <ProjectReference Include="..\..\..\..\..\..\..\TWS API\source\CSharpClient\client\CSharpAPI.csproj">
       <Project>{8ede0744-96c2-40b0-a8dc-37df79370203}</Project>
       <Name>CSharpAPI</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties accounts_1json__JSONSchema="http://json.schemastore.org/appsettings" assets_1json__JSONSchema="http://json.schemastore.org/circleciconfig" />
+      <UserProperties assets_1json__JSONSchema="http://json.schemastore.org/circleciconfig" accounts_1json__JSONSchema="http://json.schemastore.org/appsettings" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

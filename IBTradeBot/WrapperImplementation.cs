@@ -47,8 +47,8 @@ namespace IBTradeBot
 
         private void Initialize()
         {
-            assetLoader = new Loader<AssetParameters>("../../../../assets.json", "Assets");
-            accountLoader = new Loader<AccountParameters>("../../../../accounts.json", "Accounts");
+            assetLoader = new Loader<AssetParameters>("../../assets.json", "Assets");
+            accountLoader = new Loader<AccountParameters>("../../accounts.json", "Accounts");
         }
 
         public WrapperImplementation() : this(defaulthost, defaultPort, defaultClientId) { } //done
@@ -141,7 +141,7 @@ namespace IBTradeBot
                 {
                     if (order.Value.Order != null)
                     {
-                        if (order.Value.Contract.Symbol == symbol)
+                        if (order.Value.Contract.Symbol == symbol && positionInAccount.ContainsKey(order.Value.Order.Account))
                         {
                             var currentOrdered = positionInAccount[order.Value.Order.Account].ordered;
                             var currentOpened = positionInAccount[order.Value.Order.Account].opened;
@@ -160,29 +160,34 @@ namespace IBTradeBot
                 {
                     var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered; 
                     var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
+                    var validAccounts = accountLoader.Accounts.Select(e => e.Account);
 
-                    foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
-                    {
-                        if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize)
+                    //foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
+                    //{
+                        if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                         {
-                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
-                            bracket.ForEach(item => item.Account = clientAccount);
+                            clientSocket.reqIds(-1);
+
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
+                            bracket.ForEach(item => item.Account = accountData.Key.account);
     
                         foreach (var elem in bracket)
                                 clientSocket.placeOrder(elem.OrderId, contract, elem);
                         }
 
-                        if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize)
+                        if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                         {
-                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId++, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
-                            bracket.ForEach(item => item.Account = clientAccount);
+                            clientSocket.reqIds(-1);
+
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
+                            bracket.ForEach(item => item.Account = accountData.Key.account);
 
                             foreach (var elem in bracket)
                                 clientSocket.placeOrder(elem.OrderId, contract, elem);
 
 
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -215,6 +220,8 @@ namespace IBTradeBot
         public override void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency) //done 2
         {
             var keywords = new List<string>() { "MarketPrice", "MarketValue", "AverageCost" };
+           // Console.WriteLine("Account Updaate Multi. Request: " + reqId + ", Account: " + account + ", ModelCode: " + modelCode + ", Key: " + key + ", Value: " + value + ", Currency: " + currency + "\n");
+
 
             if (!keywords.Contains(key))
                 return;
@@ -238,11 +245,11 @@ namespace IBTradeBot
                     var oldPropertyInfo = oldPortfolio.GetType().GetProperty(key);
                     oldPropertyInfo.SetValue(oldPortfolio, double.Parse(value));
 
+                    Console.WriteLine("Account Updaate Multi. Request: " + reqId + ", Account: " + account + ", ModelCode: " + modelCode + ", Key: " + key + ", Value: " + value + ", Currency: " + currency + "\n");
+
                     return oldPortfolio;
                 });
-            }
-           
-            //Console.WriteLine("Account Update Multi. Request: " + reqId + ", Account: " + account + ", ModelCode: " + modelCode + ", Key: " + key + ", Value: " + value + ", Currency: " + currency + "\n");
+            }           
         }
         public override void positionMulti(int reqId, string account, string modelCode, Contract contract, double pos, double avgCost) //done 2
         {
