@@ -6,12 +6,12 @@
       "Exchange": "IDEALPRO",
       "Currency": "USD",
 
-      "LowStoploss": 0.6770,
-      "HighStoploss": 0.6892,
-      "LowTakeprofit": 0.6792,
-      "HighTakeprofit": 0.6871,
-      "Close": 0.6851,
-      "MaxPositionSize": 10000
+      "LowStoploss": 0.6690,
+      "HighStoploss": 0.6896,
+      "LowTakeprofit": 0.6713,
+      "HighTakeprofit": 0.6875,
+      "Close": 0.6791,
+      "MaxPositionSize": 30000
     },
     {
       "Symbol": "CAD",
@@ -19,12 +19,12 @@
       "Exchange": "IDEALPRO",
       "Currency": "USD",
 
-      "LowStoploss": 1.3302,
-      "HighStoploss": 1.3495,
-      "LowTakeprofit": 1.3328,
-      "HighTakeprofit": 1.3462,
-      "Close": 1.3364,
-      "MaxPositionSize": 10000
+      "LowStoploss": 1.3314,
+      "HighStoploss": 1.3522,
+      "LowTakeprofit": 1.3348,
+      "HighTakeprofit": 1.3489,
+      "Close": 1.3377,
+      "MaxPositionSize": 30000
     }
   ]
 }
