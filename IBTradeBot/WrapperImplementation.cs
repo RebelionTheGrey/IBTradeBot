@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Every;
+
 using PositionCollection = System.Collections.Concurrent.ConcurrentDictionary<string, IBTradeBot.Containers.PositionContainer>;
 
 namespace IBTradeBot
@@ -41,19 +43,28 @@ namespace IBTradeBot
         private ConcurrentDictionary<int, OrderContainer> orders = new ConcurrentDictionary<int, OrderContainer>();
         private ConcurrentDictionary<int, ContractDetails> contracts = new ConcurrentDictionary<int, ContractDetails>();
 
+        private List<string> orderTypes = new List<string>() { "ApiPending", "PendingSubmit", "PreSubmitted", "Submitted" };
+
         private object positionLocker = new object();
         private object orderLocker = new object();
         private object portfolioLocker = new object();
+
+        private volatile bool stopTrading;
 
         private void Initialize()
         {
             assetLoader = new Loader<AssetParameters>("../../assets.json", "Assets");
             accountLoader = new Loader<AccountParameters>("../../accounts.json", "Accounts");
+
+            stopTrading = false;
+
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(0, 30).Do(() => DayOpening());
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(23, 40).Do(() => DayClosing());
         }
 
-        public WrapperImplementation() : this(defaulthost, defaultPort, defaultClientId) { } //done
+        public WrapperImplementation() : this(defaulthost, defaultPort, defaultClientId) { } //done 2
 
-        public WrapperImplementation(string host, int port, int? clientId) //done
+        public WrapperImplementation(string host, int port, int? clientId) //done 2
         {
             this.host = host;
             this.port = port;
@@ -74,6 +85,53 @@ namespace IBTradeBot
 
             messageProcessingTask = new Task(() => { while (clientSocket.IsConnected()) { signal.waitForSignal(); reader.processMsgs(); } });
             messageProcessingTask.Start();
+        }
+
+        public void DayOpening()
+        {
+            stopTrading = false;
+        }
+
+        public void DayClosing()
+        {
+            stopTrading = true;
+
+            var assets = assetLoader.Accounts.Select(e => e.Symbol);
+            var accounts = accountLoader.Accounts.Select(e => e.Account);
+
+            lock (orderLocker)
+            {
+                foreach (var symbol in assets)
+                {
+                    foreach (var order in orders.Values)
+                    {
+                        if (order.Contract.Symbol == symbol && orderTypes.Contains(order.OrderState.Status)) { clientSocket.cancelOrder(order.Order.OrderId); }
+                    }
+                }
+
+                foreach (var account in accounts)
+                {
+                    var currentCollection = positions.FirstOrDefault(k => k.Key.account == account).Value;
+
+                    if (currentCollection != null)
+                    {
+                        foreach(var position in currentCollection)
+                        {
+                            if (assets.Contains(position.Key))
+                            {
+                                clientSocket.reqIds(-1);
+
+                                var details = contracts.FirstOrDefault(c => c.Value.Contract.Symbol == position.Key).Value;
+
+                                var orderAction = position.Value.Position > 0 ? "SELL" : "BUY";
+                                var order = OrderSamples.MarketOrder(orderAction, Math.Abs(position.Value.Position));
+
+                                clientSocket.placeOrder(nextValidOrderId, details.Contract, order);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public void GetContract(string code, string type, string exchange, string currency) //done 2
@@ -121,57 +179,60 @@ namespace IBTradeBot
 
         public override void tickPrice(int tickerId, int field, double price, TickAttrib attribs) //done 2
         {
-            if (!contracts.ContainsKey(tickerId))
-                return;
-
-            var orderTypes = new List<string>() { "ApiPending", "PendingSubmit", "PreSubmitted", "Submitted" };
-
-            if (contracts.TryGetValue(tickerId, out var contractDetail))
+            lock (orderLocker)
             {
-                var symbol = contractDetail.Contract.Symbol;
-                var positionInAccount = new Dictionary<string, (double opened, double ordered)>();
+                if (stopTrading)
+                    return;
 
-                foreach (var accountPosition in positions)
-                {
-                    var currentPosition = accountPosition.Value.TryGetValue(symbol, out var position) ? position.Position : 0;
-                    positionInAccount.Add(accountPosition.Key.account, (currentPosition, 0));
-                }
+                if (!contracts.ContainsKey(tickerId))
+                    return;
 
-                foreach (var order in orders)
+                if (contracts.TryGetValue(tickerId, out var contractDetail))
                 {
-                    if (order.Value.Order != null)
+                    var symbol = contractDetail.Contract.Symbol;
+                    var positionInAccount = new Dictionary<string, (double opened, double ordered)>();
+
+                    foreach (var accountPosition in positions)
                     {
-                        if (order.Value.Contract.Symbol == symbol && positionInAccount.ContainsKey(order.Value.Order.Account))
+                        var currentPosition = accountPosition.Value.TryGetValue(symbol, out var position) ? position.Position : 0;
+                        positionInAccount.Add(accountPosition.Key.account, (currentPosition, 0));
+                    }
+
+                    foreach (var order in orders)
+                    {
+                        if (order.Value.Order != null)
                         {
-                            var currentOrdered = positionInAccount[order.Value.Order.Account].ordered;
-                            var currentOpened = positionInAccount[order.Value.Order.Account].opened;
+                            if (order.Value.Contract.Symbol == symbol && positionInAccount.ContainsKey(order.Value.Order.Account))
+                            {
+                                var currentOrdered = positionInAccount[order.Value.Order.Account].ordered;
+                                var currentOpened = positionInAccount[order.Value.Order.Account].opened;
 
-                            if (orderTypes.Contains(order.Value.OrderState.Status) && order.Value.OrderStatus != null && order.Value.Order.ParentId == 0) { currentOrdered += order.Value.OrderStatus.Remaining; }
+                                if (orderTypes.Contains(order.Value.OrderState.Status) && order.Value.OrderStatus != null && order.Value.Order.ParentId == 0) { currentOrdered += order.Value.OrderStatus.Remaining; }
 
-                            positionInAccount[order.Value.Order.Account] = (currentOpened, currentOrdered);
+                                positionInAccount[order.Value.Order.Account] = (currentOpened, currentOrdered);
+                            }
                         }
                     }
-                }
 
 
-                var asset = assetLoader.Accounts.FirstOrDefault(e => e.Symbol == symbol);
+                    var asset = assetLoader.Accounts.FirstOrDefault(e => e.Symbol == symbol);
 
-                foreach (var accountData in positions)
-                {
-                    var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered; 
-                    var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
-                    var validAccounts = accountLoader.Accounts.Select(e => e.Account);
+                    foreach (var accountData in positions)
+                    {
+                        var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered;
+                        var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
+                        var validAccounts = accountLoader.Accounts.Select(e => e.Account);
 
-                    //foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
-                    //{
+                        //foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
+                        //{
                         if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                         {
                             clientSocket.reqIds(-1);
 
                             List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
                             bracket.ForEach(item => item.Account = accountData.Key.account);
-    
-                        foreach (var elem in bracket)
+
+                            foreach (var elem in bracket)
                                 clientSocket.placeOrder(elem.OrderId, contract, elem);
                         }
 
@@ -187,7 +248,8 @@ namespace IBTradeBot
 
 
                         }
-                    //}
+                        //}
+                    }
                 }
             }
         }
