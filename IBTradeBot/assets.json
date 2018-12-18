@@ -14,10 +14,10 @@
       "MaxPositionSize": 30000
     },
     {
-      "Symbol": "CAD",
+      "Symbol": "USD",
       "SecType": "CASH",
       "Exchange": "IDEALPRO",
-      "Currency": "USD",
+      "Currency": "CAD",
 
       "LowStoploss": 1.3314,
       "HighStoploss": 1.3522,
