@@ -19,7 +19,7 @@ namespace IBTradeBot
     public class WrapperImplementation : DefaultEWrapper
     {
         private static string defaulthost = "127.0.0.1";
-        private static int defaultPort = 7501;
+        private static int defaultPort = 7503;
         private static int defaultClientId = 0;
 
         private string host;
@@ -179,7 +179,7 @@ namespace IBTradeBot
 
         public override void tickPrice(int tickerId, int field, double price, TickAttrib attribs) //done 2
         {
-            lock (orderLocker)
+            //lock (orderLocker)
             {
                 if (stopTrading)
                     return;
@@ -190,6 +190,9 @@ namespace IBTradeBot
                 if (contracts.TryGetValue(tickerId, out var contractDetail))
                 {
                     var symbol = contractDetail.Contract.Symbol;
+
+                    Console.WriteLine($"Tick received: {symbol}, {price}");
+
                     var positionInAccount = new Dictionary<string, (double opened, double ordered)>();
 
                     foreach (var accountPosition in positions)
