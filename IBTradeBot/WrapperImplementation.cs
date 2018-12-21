@@ -191,7 +191,7 @@ namespace IBTradeBot
                 {
                     var symbol = contractDetail.Contract.Symbol;
 
-                    Console.WriteLine($"Tick received: {symbol}, {price}");
+                    Console.WriteLine($"Tick received: {symbol}, {price}, {DateTime.Now}");
 
                     var positionInAccount = new Dictionary<string, (double opened, double ordered)>();
 
