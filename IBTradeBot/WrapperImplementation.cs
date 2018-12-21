@@ -228,7 +228,7 @@ namespace IBTradeBot
 
                         //foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
                         //{
-                        if (price >= asset.HighTakeprofit && price < (asset.HighTakeprofit + asset.HighStoploss) / 2 && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
+                        if (price >= asset.HighTakeprofit && price < asset.HighTakeprofit + (asset.HighStoploss - asset.HighTakeprofit) / 4 && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                         {
                             clientSocket.reqIds(-1);
 
@@ -239,7 +239,7 @@ namespace IBTradeBot
                                 clientSocket.placeOrder(elem.OrderId, contract, elem);
                         }
 
-                        if (price <= asset.LowTakeprofit && price > (asset.LowTakeprofit + asset.LowStoploss) / 2 && totalPosition < asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
+                        if (price <= asset.LowTakeprofit && price > asset.LowTakeprofit - (asset.LowTakeprofit - asset.LowStoploss) / 4 && totalPosition < asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                         {
                             clientSocket.reqIds(-1);
 
