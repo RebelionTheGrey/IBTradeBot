@@ -179,7 +179,7 @@ namespace IBTradeBot
 
         public override void tickPrice(int tickerId, int field, double price, TickAttrib attribs) //done 2
         {
-            //lock (orderLocker)
+            lock (orderLocker)
             {
                 if (stopTrading)
                     return;
