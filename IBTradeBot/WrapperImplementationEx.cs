@@ -123,7 +123,8 @@ namespace IBTradeBot
                     AccountName = account,
                     PnLContainer = new PnLContainerEx() { Id = pnlId },
                     PortfolioContainer = new PortfolioContainerEx() { Id = portfolioId },
-                    PositionContainer = new PositionContainerEx() { Id = positionId }
+                    PositionContainer = new PositionContainerEx() { Id = positionId },
+                    OrderContainer = new OrderContainerEx()                    
                 };
 
                 accountList.TryAdd(account, newAccount);
