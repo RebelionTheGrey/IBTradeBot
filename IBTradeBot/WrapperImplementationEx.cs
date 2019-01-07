@@ -232,6 +232,9 @@ namespace IBTradeBot
 
         public override void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
+            if (accountList.Count == 0)
+                return;
+
             var newOrder = new OrderElement()
             {
                 Contract = contract,
