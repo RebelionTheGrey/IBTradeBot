@@ -126,6 +126,8 @@ namespace IBTradeBot
                     PositionContainer = new PositionContainerEx() { Id = positionId }
                 };
 
+                accountList.TryAdd(account, newAccount);
+
                 clientSocket.reqAccountUpdatesMulti(portfolioId, account, "", true);
                 clientSocket.reqPnL(pnlId, account, "");
                 clientSocket.reqPositionsMulti(positionId, account, "");
