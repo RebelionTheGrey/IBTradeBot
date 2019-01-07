@@ -19,7 +19,7 @@ namespace IBTradeBot
     public class WrapperImplementation : DefaultEWrapper
     {
         private static string defaulthost = "127.0.0.1";
-        private static int defaultPort = 7505;
+        private static int defaultPort = 7503;
         private static int defaultClientId = 0;
 
         private string host;
