@@ -282,6 +282,7 @@ namespace IBTradeBot
             clientSocket.reqAllOpenOrders();
             clientSocket.reqIds(-1);
         }
+
         public override void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency) //done 2
         {
             var keywords = new List<string>() { "MarketPrice", "MarketValue", "AverageCost" };
