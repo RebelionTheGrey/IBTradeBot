@@ -10,7 +10,7 @@ namespace IBTradeBot
     {
         static void Main(string[] args)
         {
-            var newIBBot = new WrapperImplementation();
+            var newIBBot = new WrapperImplementationEx();
 
             newIBBot.Connect();
             newIBBot.StartMessageProcessing(); 
