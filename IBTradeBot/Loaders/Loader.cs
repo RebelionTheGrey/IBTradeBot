@@ -10,7 +10,7 @@ namespace IBTradeBot.Loaders
 {
     public class Loader<T>
     {
-        public List<T> Accounts { get; set; } = new List<T>();
+        public List<T> Elements { get; set; } = new List<T>();
 
         public Loader(string file, string rootName)
         {
@@ -19,7 +19,7 @@ namespace IBTradeBot.Loaders
             foreach (var elem in jsonData[rootName])
             {
                 var accountParams = elem.ToObject<T>();
-                Accounts.Add(accountParams);
+                Elements.Add(accountParams);
             }
         }
     }

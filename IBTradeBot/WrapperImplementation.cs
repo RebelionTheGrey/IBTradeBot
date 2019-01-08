@@ -96,8 +96,8 @@ namespace IBTradeBot
         {
             stopTrading = true;
 
-            var assets = assetLoader.Accounts.Select(e => e.Symbol);
-            var accounts = accountLoader.Accounts.Select(e => e.Account);
+            var assets = assetLoader.Elements.Select(e => e.Symbol);
+            var accounts = accountLoader.Elements.Select(e => e.Account);
 
             lock (orderLocker)
             {
@@ -218,13 +218,13 @@ namespace IBTradeBot
                     }
 
 
-                    var asset = assetLoader.Accounts.FirstOrDefault(e => e.Symbol == symbol);
+                    var asset = assetLoader.Elements.FirstOrDefault(e => e.Symbol == symbol);
 
                     foreach (var accountData in positions)
                     {
                         var totalPosition = positionInAccount[accountData.Key.account].opened + positionInAccount[accountData.Key.account].ordered;
                         var contract = contracts.FirstOrDefault(e => e.Value.Contract.Symbol == symbol).Value.Contract;
-                        var validAccounts = accountLoader.Accounts.Select(e => e.Account);
+                        var validAccounts = accountLoader.Elements.Select(e => e.Account);
 
                         //foreach (var clientAccount in accountLoader.Accounts.Select(e => e.Account))
                         //{
@@ -276,7 +276,7 @@ namespace IBTradeBot
                 clientSocket.reqPositionsMulti(positionId, account, "");
             });
 
-            foreach (var elem in assetLoader.Accounts) { GetContract(elem.Symbol, elem.SecType, elem.Exchange, elem.Currency); }
+            foreach (var elem in assetLoader.Elements) { GetContract(elem.Symbol, elem.SecType, elem.Exchange, elem.Currency); }
 
             clientSocket.reqMarketDataType(1);
             clientSocket.reqAllOpenOrders();

@@ -44,7 +44,9 @@ namespace IBTradeBot
 
         private ConcurrentDictionary<string, bool> symbolPermission = new ConcurrentDictionary<string, bool>();
 
+        private List<string> orderTypes = new List<string>() { "ApiPending", "PendingSubmit", "PreSubmitted", "Submitted" };
 
+        private volatile bool stopTrading;
         private object orderLocker = new object();
 
         private void LoadTradeData()
@@ -57,8 +59,43 @@ namespace IBTradeBot
         {
             LoadTradeData();
 
-            //Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(0, 30).Do(() => DayOpening());
-            //Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(23, 40).Do(() => DayClosing());
+            stopTrading = false;
+
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(0, 30).Do(() => DayOpening());
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(23, 40).Do(() => DayClosing());
+        }
+
+        public void DayOpening()
+        {
+            stopTrading = false;
+        }
+
+        public void DayClosing()
+        {
+            stopTrading = true;
+
+            var symbols = assetLoader.Elements.Select(e => e.Symbol);
+
+            foreach (var account in accountList)
+            {
+                foreach (var orderElement in account.Value.OrderContainer.Orders)
+                {
+                    if (symbols.Contains(orderElement.Contract.Symbol) && orderTypes.Contains(orderElement.OrderState.Status)) { clientSocket.cancelOrder(orderElement.Order.OrderId); }
+                }
+
+                foreach (var positionElement in account.Value.PositionContainer.Positions)
+                {
+                    if (symbols.Contains(positionElement.Contract.Symbol))
+                    {
+                        clientSocket.reqIds(-1);
+
+                        var orderAction = positionElement.Position > 0 ? "SELL" : "BUY";
+                        var order = OrderSamples.MarketOrder(orderAction, Math.Abs(positionElement.Position));
+
+                        clientSocket.placeOrder(nextValidOrderId, positionElement.Contract, order);
+                    }
+                }
+            }
         }
 
         public WrapperImplementationEx() : this(defaulthost, defaultPort, defaultClientId) { }
@@ -140,7 +177,7 @@ namespace IBTradeBot
                 clientSocket.reqPositionsMulti(positionId, account, "");
             });
 
-            foreach (var elem in assetLoader.Accounts) { GetContract(elem.Symbol, elem.SecType, elem.Exchange, elem.Currency); }
+            foreach (var elem in assetLoader.Elements) { GetContract(elem.Symbol, elem.SecType, elem.Exchange, elem.Currency); }
 
             clientSocket.reqMarketDataType(1);
             clientSocket.reqAllOpenOrders();
@@ -279,7 +316,7 @@ namespace IBTradeBot
             {
                 var symbol = contractDetail.Contract.Symbol;
                 var contract = contractDetail.Contract;
-                var asset = assetLoader.Accounts.FirstOrDefault(e => e.Symbol == symbol);
+                var asset = assetLoader.Elements.FirstOrDefault(e => e.Symbol == symbol);
 
                 Console.WriteLine($"Tick received: {symbol} to {contractDetail.Contract.Currency}, {price}, {DateTime.Now}");
 
@@ -287,7 +324,7 @@ namespace IBTradeBot
                 {
                     var accountName = account.Key;
                     var accountValue = account.Value;
-                    var validAccounts = accountLoader.Accounts.Select(e => e.Account);
+                    var validAccounts = accountLoader.Elements.Select(e => e.Account);
 
                     account.Value.Sync.WaitOne();
 
