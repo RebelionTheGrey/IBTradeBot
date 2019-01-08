@@ -309,7 +309,7 @@ namespace IBTradeBot
         public override void tickPrice(int tickerId, int field, double price, TickAttrib attribs) 
         {
 
-            if (!contracts.ContainsKey(tickerId))
+            if (!contracts.ContainsKey(tickerId) || stopTrading)
                 return;
 
             if (contracts.TryGetValue(tickerId, out var contractDetail))
