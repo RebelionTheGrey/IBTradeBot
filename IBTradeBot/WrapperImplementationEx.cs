@@ -42,6 +42,9 @@ namespace IBTradeBot
         private ConcurrentDictionary<int, OrderElement> hangingOrders = new ConcurrentDictionary<int, OrderElement>();
         private ConcurrentDictionary<int, string> orderToAccountMapping = new ConcurrentDictionary<int, string>();
 
+        private ConcurrentDictionary<string, bool> symbolPermission = new ConcurrentDictionary<string, bool>();
+
+
         private object orderLocker = new object();
 
         private void LoadTradeData()
@@ -74,6 +77,7 @@ namespace IBTradeBot
         }
 
         public void Connect() => clientSocket.eConnect(host, port, clientId);
+
         public void StartMessageProcessing()
         {
             reader = new EReader(clientSocket, signal);
@@ -94,6 +98,8 @@ namespace IBTradeBot
             };
 
             int id = RandomGen3.Next();
+
+            symbolPermission.TryAdd(code, true);
 
             clientSocket.reqContractDetails(id, contract);
             clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
@@ -258,6 +264,8 @@ namespace IBTradeBot
                 accountList[order.Account].OrderContainer.Orders.Add(newOrder);
             }
 
+            symbolPermission[contract.Symbol] = true;
+
             Console.WriteLine("OpenOrder. ID: " + orderId + ", " + contract.Symbol + ", " + contract.SecType + " @ " + contract.Exchange + ": " + order.Action + ", " + order.OrderType + " " + order.TotalQuantity + ", " + orderState.Status);
         }
 
@@ -283,9 +291,10 @@ namespace IBTradeBot
 
                     account.Value.Sync.WaitOne();
 
-                    if (price >= asset.HighTakeprofit && price < asset.HighTakeprofit + (asset.HighStoploss - asset.HighTakeprofit) / 4 && validAccounts.Contains(accountName))// && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
+                    if (price >= asset.HighTakeprofit && price < asset.HighTakeprofit + (asset.HighStoploss - asset.HighTakeprofit) / 4 && validAccounts.Contains(accountName) && symbolPermission[symbol])// && totalPosition > -1 * asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                     {
                         var totalPosition = account.Value.GetTotalPosition(symbol);
+                        symbolPermission[symbol] = false;
 
                         clientSocket.reqIds(-1);
 
@@ -299,9 +308,10 @@ namespace IBTradeBot
                         }
                     }
 
-                    if (price <= asset.LowTakeprofit && price > asset.LowTakeprofit - (asset.LowTakeprofit - asset.LowStoploss) / 4 && validAccounts.Contains(accountName))// && totalPosition < asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
+                    if (price <= asset.LowTakeprofit && price > asset.LowTakeprofit - (asset.LowTakeprofit - asset.LowStoploss) / 4 && validAccounts.Contains(accountName) && symbolPermission[symbol])// && totalPosition < asset.MaxPositionSize && validAccounts.Contains(accountData.Key.account))
                     {
                         var totalPosition = account.Value.GetTotalPosition(symbol);
+                        symbolPermission[symbol] = false;
 
                         clientSocket.reqIds(-1);
 
