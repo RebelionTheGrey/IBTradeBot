@@ -337,7 +337,7 @@ namespace IBTradeBot
 
                         if (asset.MaxPositionSize - Math.Abs(totalPosition) > 0)
                         {
-                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.HighStoploss);
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "SELL", asset.MaxPositionSize - Math.Abs(totalPosition), asset.HighTakeprofit, asset.Close, asset.HighStoploss);
                             bracket.ForEach(item => item.Account = accountName);
 
                             foreach (var elem in bracket)
@@ -355,7 +355,7 @@ namespace IBTradeBot
                         if (asset.MaxPositionSize - Math.Abs(totalPosition) > 0)
                         {
 
-                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), price, asset.Close, asset.LowStoploss);
+                            List<Order> bracket = OrderSamples.BracketOrder(nextValidOrderId, "BUY", asset.MaxPositionSize - Math.Abs(totalPosition), asset.LowTakeprofit, asset.Close, asset.LowStoploss);
                             bracket.ForEach(item => item.Account = accountName);
 
                             foreach (var elem in bracket)
