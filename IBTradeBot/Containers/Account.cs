@@ -30,7 +30,7 @@ namespace IBTradeBot.Containers
             //Sync.WaitOne();
 
             var items = OrderContainer.Orders.Where(e => e.OrderStatus == null || orderTypes.Contains(e.OrderStatus.Status));
-            var orderedPosition = items.Where(e => e.Order.ParentId == 0).Select(o =>
+            var orderedPosition = items.Where(e => e.Order.ParentId == 0 && e.Contract.Symbol == symbol).Select(o =>
             {
                 return o.OrderStatus != null ? o.OrderStatus.Remaining : o.Order.TotalQuantity;
             }).Sum();
