@@ -65,6 +65,11 @@ namespace IBTradeBot
             Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(23, 40).Do(() => DayClosing());
         }
 
+        private void RechargeSymbol(string symbol)
+        {
+            symbolPermission[symbol] = true;
+        }
+
         public void DayOpening()
         {
             stopTrading = false;
@@ -332,6 +337,7 @@ namespace IBTradeBot
                     {
                         var totalPosition = account.Value.GetTotalPosition(symbol);
                         symbolPermission[symbol] = false;
+                        Once.After(10).Seconds.Do((s) => RechargeSymbol(s.Metadata), symbol);
 
                         clientSocket.reqIds(-1);
 
@@ -349,6 +355,7 @@ namespace IBTradeBot
                     {
                         var totalPosition = account.Value.GetTotalPosition(symbol);
                         symbolPermission[symbol] = false;
+                        Once.After(10).Seconds.Do((s) => RechargeSymbol(s.Metadata), symbol);
 
                         clientSocket.reqIds(-1);
 
