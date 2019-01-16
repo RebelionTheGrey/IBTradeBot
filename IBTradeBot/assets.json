@@ -45,11 +45,11 @@
       "Exchange": "IDEALPRO",
       "Currency": "USD",
 
-      "LowStoploss": 0.7116,
-      "HighStoploss": 0.7272,
-      "LowTakeprofit": 0.7143,
-      "HighTakeprofit": 0.7239,
-      "Close": 0.7201,
+      "LowStoploss": 0.7094,
+      "HighStoploss": 0.7230,
+      "LowTakeprofit": 0.7121,
+      "HighTakeprofit": 0.7207,
+      "Close": 0.7170,
       "MaxPositionSize": 30000
     }
   ]
