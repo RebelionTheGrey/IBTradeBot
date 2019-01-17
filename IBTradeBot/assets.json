@@ -20,10 +20,10 @@
       "Currency": "CAD",
 
       "LowStoploss": 1.3156,
-      "HighStoploss": 1.3407,
+      "HighStoploss": 1.3489,
       "LowTakeprofit": 1.3211,
       "HighTakeprofit": 1.3427,
-      "Close": 1.3274,
+      "Close": 1.3317,
       "MaxPositionSize": 30000
     },
     {
