@@ -46,10 +46,10 @@
       "Currency": "USD",
 
       "LowStoploss": 0.7029,
-      "HighStoploss": 0.7137,
+      "HighStoploss": 0.7185,
       "LowTakeprofit": 0.7048,
-      "HighTakeprofit": 0.7117,
-      "Close": 0.7083,
+      "HighTakeprofit": 0.7161,
+      "Close": 0.7099,
       "MaxPositionSize": 50000
     }
   ]
