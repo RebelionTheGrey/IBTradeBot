@@ -46,7 +46,7 @@ namespace IBTradeBot
 
         private List<string> orderTypes = new List<string>() { "ApiPending", "PendingSubmit", "PreSubmitted", "Submitted" };
 
-        private volatile bool stopTrading;
+        private volatile bool stopTrading = false;
         private object orderLocker = new object();
 
         private void LoadTradeData()
@@ -61,8 +61,8 @@ namespace IBTradeBot
 
             stopTrading = false;
 
-            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(16, 30).Do(() => DayOpening());
-            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(15, 50).Do(() => DayClosing());
+            //Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(16, 29).Do(() => DayOpening());
+            //Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(16, 30).Do(() => DayClosing());
         }
 
         private void RechargeSymbol(string symbol)
