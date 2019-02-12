@@ -61,8 +61,8 @@ namespace IBTradeBot
 
             stopTrading = false;
 
-            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(0, 30).Do(() => DayOpening());
-            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(23, 40).Do(() => DayClosing());
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(16, 30).Do(() => DayOpening());
+            Ever.y(DayOfWeek.Monday, DayOfWeek.Thursday, DayOfWeek.Wednesday, DayOfWeek.Tuesday, DayOfWeek.Saturday).At(15, 50).Do(() => DayClosing());
         }
 
         private void RechargeSymbol(string symbol)
@@ -73,6 +73,8 @@ namespace IBTradeBot
         public void DayOpening()
         {
             stopTrading = false;
+
+            Console.WriteLine("Day've been opened");
         }
 
         public void DayClosing()
@@ -101,6 +103,8 @@ namespace IBTradeBot
                     }
                 }
             }
+
+            Console.WriteLine("Day've been closed");
         }
 
         public WrapperImplementationEx() : this(defaulthost, defaultPort, defaultClientId) { }
