@@ -177,7 +177,7 @@ namespace IBTradeBot
 
                 };
 
-                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString(), "1 D", "1 min", "TRADES", 1, 1, false, null);
+                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "TRADES", 1, 1, false, null);
                 currentDaysShift--;
             }
         }
@@ -205,7 +205,7 @@ namespace IBTradeBot
 
 
             //clientSocket.reqHistoricalData(4001, contract, DateTime.Today.ToString(), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
-            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString(), "1 D", "1 min", "TRADES", 1, 1, false, null);
+            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "TRADES", 1, 1, false, null);
 
             //clientSocket.reqHistoricalData(4001, ContractSamples.EurGbpFx(), queryTime, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
             //client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), queryTime, "10 D", "1 min", "TRADES", 1, 1, false, null);
