@@ -51,8 +51,8 @@ namespace IBTradeBot
 
         private void LoadTradeData()
         {
-            assetLoader = new Loader<AssetParameters>("../../assets.json", "Assets");
-            accountLoader = new Loader<AccountParameters>("../../accounts.json", "Accounts");
+           // assetLoader = new Loader<AssetParameters>("../../assets.json", "Assets");
+           // accountLoader = new Loader<AccountParameters>("../../accounts.json", "Accounts");
         }
 
         private void Initialize()
@@ -147,8 +147,11 @@ namespace IBTradeBot
 
             symbolPermission.TryAdd(code, true);
 
+
+            /*****
             clientSocket.reqContractDetails(id, contract);
             clientSocket.reqMktData(id, contract, string.Empty, false, false, null);
+            *****/
         }
 
         public override void contractDetails(int reqId, ContractDetails contractDetails)
@@ -156,8 +159,31 @@ namespace IBTradeBot
             contracts.TryAdd(reqId, contractDetails);
         }
 
+
+        public override void historicalData(int reqId, Bar bar)
+        {
+            Console.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
+        }
+
         public override void managedAccounts(string accountsList)
         {
+            var contract = new Contract()
+            {
+                Symbol = "EUR",
+                SecType = "CASH",
+                Currency = "USD",
+                Exchange = "IDEALPRO",
+                
+            };
+
+            String queryTime = DateTime.Now.AddMonths(-35).ToString("yyyyMMdd HH:mm:ss");
+            clientSocket.reqHistoricalData(4001, contract, DateTime.Now.ToString(), "3 Y", "1 min", "MIDPOINT", 1, 1, true, null);
+            clientSocket.reqHistoricalData(4002, contract, DateTime.Now.ToString(), "3 Y", "1 min", "TRADES", 1, 1, true, null);
+
+            //clientSocket.reqHistoricalData(4001, ContractSamples.EurGbpFx(), queryTime, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
+            //client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), queryTime, "10 D", "1 min", "TRADES", 1, 1, false, null);
+
+            /******
             var splittedAccounts = accountsList.Split(',').Where(e => e.Length > 0).ToList();
 
             splittedAccounts.ForEach(account =>
@@ -191,6 +217,7 @@ namespace IBTradeBot
             clientSocket.reqMarketDataType(1);
             clientSocket.reqAllOpenOrders();
             clientSocket.reqIds(-1);
+            ******/
         }
 
         public override void pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL)
