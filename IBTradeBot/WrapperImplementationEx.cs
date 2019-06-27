@@ -159,6 +159,15 @@ namespace IBTradeBot
             contracts.TryAdd(reqId, contractDetails);
         }
 
+        public override void historicalDataEnd(int reqId, string startDate, string endDate)
+        {
+            Console.WriteLine("HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
+        }
+
+        public override void historicalDataUpdate(int reqId, Bar bar)
+        {
+            Console.WriteLine("HistoricalDataUpdate. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
+        }
 
         public override void historicalData(int reqId, Bar bar)
         {
