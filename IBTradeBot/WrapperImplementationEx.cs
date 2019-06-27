@@ -49,6 +49,9 @@ namespace IBTradeBot
         private volatile bool stopTrading = false;
         private object orderLocker = new object();
 
+        private int maxDaysDeep = -2;
+        private int currentDaysShift = 0;
+
         private void LoadTradeData()
         {
            // assetLoader = new Loader<AssetParameters>("../../assets.json", "Assets");
@@ -162,6 +165,21 @@ namespace IBTradeBot
         public override void historicalDataEnd(int reqId, string startDate, string endDate)
         {
             Console.WriteLine("HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
+
+            if (currentDaysShift >= maxDaysDeep)
+            {
+                var contract = new Contract()
+                {
+                    Symbol = "EUR",
+                    SecType = "CASH",
+                    Currency = "USD",
+                    Exchange = "IDEALPRO",
+
+                };
+
+                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString(), "1 D", "1 min", "TRADES", 1, 1, false, null);
+                currentDaysShift--;
+            }
         }
 
         public override void historicalDataUpdate(int reqId, Bar bar)
@@ -185,9 +203,9 @@ namespace IBTradeBot
                 
             };
 
-            String queryTime = DateTime.Now.AddMonths(-35).ToString("yyyyMMdd HH:mm:ss");
-            clientSocket.reqHistoricalData(4001, contract, DateTime.Now.ToString(), "3 Y", "1 min", "MIDPOINT", 1, 1, true, null);
-            clientSocket.reqHistoricalData(4002, contract, DateTime.Now.ToString(), "3 Y", "1 min", "TRADES", 1, 1, true, null);
+
+            //clientSocket.reqHistoricalData(4001, contract, DateTime.Today.ToString(), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
+            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString(), "1 D", "1 min", "TRADES", 1, 1, false, null);
 
             //clientSocket.reqHistoricalData(4001, ContractSamples.EurGbpFx(), queryTime, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
             //client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), queryTime, "10 D", "1 min", "TRADES", 1, 1, false, null);
