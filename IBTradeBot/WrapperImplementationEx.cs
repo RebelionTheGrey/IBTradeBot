@@ -311,6 +311,7 @@ namespace IBTradeBot
 
         public override void openOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
+            /*****
             if (accountList.Count == 0)
                 return;
 
@@ -405,6 +406,8 @@ namespace IBTradeBot
                     account.Value.Sync.ReleaseMutex();
                 }
             }
+
+            *****/
         }
 
         public override void accountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency) //done 2
