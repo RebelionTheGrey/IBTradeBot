@@ -11,8 +11,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Ganss.Excel;
+using Ganss;
+
 namespace IBTradeBot
 {
+    public class ForexData
+    {
+        public DateTime TradeTime { get; set; }
+        public double Open { get; set; }
+        public double High { get; set; }
+        public double Low { get; set; }
+        public double Close { get; set; }
+        public double OHLC { get { return (Open + High + Low + Close) / 4; } }
+    }
+
     public class WrapperImplementationEx : DefaultEWrapper
     {
         private static string defaulthost = "127.0.0.1";
@@ -51,6 +64,10 @@ namespace IBTradeBot
 
         private int maxDaysDeep = -2;
         private int currentDaysShift = 0;
+
+        private ExcelMapper excelFile = new ExcelMapper("EURUSD1min.xlsx");
+        private List<ForexData> forexData = new List<ForexData>();
+        
 
         private void LoadTradeData()
         {
@@ -180,6 +197,11 @@ namespace IBTradeBot
                 clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "TRADES", 1, 1, false, null);
                 currentDaysShift--;
             }
+            else
+            {
+                excelFile.Save<ForexData>("EURUSD1min.xlsx", forexData, "EURUSD");
+            }
+
         }
 
         public override void historicalDataUpdate(int reqId, Bar bar)
@@ -190,6 +212,17 @@ namespace IBTradeBot
         public override void historicalData(int reqId, Bar bar)
         {
             Console.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
+
+            var newBar = new ForexData()
+            {
+                Close = bar.Close,
+                High = bar.High,
+                Low = bar.Low,
+                Open = bar.Open,
+                TradeTime = DateTime.Parse(bar.Time),
+            };
+
+            forexData.Add(newBar);
         }
 
         public override void managedAccounts(string accountsList)
@@ -199,8 +232,7 @@ namespace IBTradeBot
                 Symbol = "EUR",
                 SecType = "CASH",
                 Currency = "USD",
-                Exchange = "IDEALPRO",
-                
+                Exchange = "IDEALPRO",                
             };
 
 
