@@ -214,13 +214,16 @@ namespace IBTradeBot
         {
             Console.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
 
+            var culture = CultureInfo.CurrentCulture.Clone() as CultureInfo;
+            culture.DateTimeFormat.ShortDatePattern = "yyyyMMdd HH:mm:ss";
+
             var newBar = new ForexData()
             {
                 Close = bar.Close,
                 High = bar.High,
                 Low = bar.Low,
                 Open = bar.Open,
-                TradeTime = DateTime.ParseExact(bar.Time, "yyyyMMdd HH:mm:ss", CultureInfo.InvariantCulture),
+                TradeTime = DateTime.ParseExact(bar.Time, "yyyyMMdd HH:mm:ss", culture),
             };
 
             forexData.Add(newBar);
