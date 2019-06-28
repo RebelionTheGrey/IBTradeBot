@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 using Ganss.Excel;
 using Ganss;
+using System.Globalization;
 
 namespace IBTradeBot
 {
@@ -65,7 +66,7 @@ namespace IBTradeBot
         private int maxDaysDeep = -2;
         private int currentDaysShift = 0;
 
-        private ExcelMapper excelFile = new ExcelMapper("EURUSD1min.xlsx");
+        private ExcelMapper excelFile = new ExcelMapper();
         private List<ForexData> forexData = new List<ForexData>();
         
 
@@ -194,7 +195,7 @@ namespace IBTradeBot
 
                 };
 
-                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "TRADES", 1, 1, false, null);
+                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
                 currentDaysShift--;
             }
             else
@@ -219,7 +220,7 @@ namespace IBTradeBot
                 High = bar.High,
                 Low = bar.Low,
                 Open = bar.Open,
-                TradeTime = DateTime.Parse(bar.Time),
+                TradeTime = DateTime.ParseExact(bar.Time, "yyyyMMdd HH:mm:ss", CultureInfo.InvariantCulture),
             };
 
             forexData.Add(newBar);
@@ -237,7 +238,7 @@ namespace IBTradeBot
 
 
             //clientSocket.reqHistoricalData(4001, contract, DateTime.Today.ToString(), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
-            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "TRADES", 1, 1, false, null);
+            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
 
             //clientSocket.reqHistoricalData(4001, ContractSamples.EurGbpFx(), queryTime, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
             //client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), queryTime, "10 D", "1 min", "TRADES", 1, 1, false, null);
