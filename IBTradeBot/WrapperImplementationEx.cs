@@ -180,71 +180,8 @@ namespace IBTradeBot
             contracts.TryAdd(reqId, contractDetails);
         }
 
-        public override void historicalDataEnd(int reqId, string startDate, string endDate)
-        {
-            Console.WriteLine("HistoricalDataEnd - " + reqId + " from " + startDate + " to " + endDate);
-
-            if (currentDaysShift >= maxDaysDeep)
-            {
-                var contract = new Contract()
-                {
-                    Symbol = "EUR",
-                    SecType = "CASH",
-                    Currency = "USD",
-                    Exchange = "IDEALPRO",
-
-                };
-
-                clientSocket.reqHistoricalData(reqId, contract, DateTime.Today.AddDays(currentDaysShift).ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
-                currentDaysShift--;
-            }
-            else
-            {
-                excelFile.Save<ForexData>("EURUSD1min.xlsx", forexData, "EURUSD");
-            }
-
-        }
-
-        public override void historicalDataUpdate(int reqId, Bar bar)
-        {
-            Console.WriteLine("HistoricalDataUpdate. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
-        }
-
-        public override void historicalData(int reqId, Bar bar)
-        {
-            Console.WriteLine("HistoricalData. " + reqId + " - Time: " + bar.Time + ", Open: " + bar.Open + ", High: " + bar.High + ", Low: " + bar.Low + ", Close: " + bar.Close + ", Volume: " + bar.Volume + ", Count: " + bar.Count + ", WAP: " + bar.WAP);
-
-            var newBar = new ForexData()
-            {
-                Close = bar.Close,
-                High = bar.High,
-                Low = bar.Low,
-                Open = bar.Open,
-                TradeTime = DateTime.ParseExact(bar.Time, "yyyyMMdd  HH:mm:ss", CultureInfo.InvariantCulture),
-            };
-
-            forexData.Add(newBar);
-            
-        }
-
         public override void managedAccounts(string accountsList)
         {
-            var contract = new Contract()
-            {
-                Symbol = "EUR",
-                SecType = "CASH",
-                Currency = "USD",
-                Exchange = "IDEALPRO",                
-            };
-
-
-            //clientSocket.reqHistoricalData(4001, contract, DateTime.Today.ToString(), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
-            clientSocket.reqHistoricalData(4002, contract, DateTime.Today.ToString("yyyyMMdd HH:mm:ss"), "1 D", "1 min", "MIDPOINT", 1, 1, false, null);
-
-            //clientSocket.reqHistoricalData(4001, ContractSamples.EurGbpFx(), queryTime, "1 M", "1 day", "MIDPOINT", 1, 1, false, null);
-            //client.reqHistoricalData(4002, ContractSamples.EuropeanStock(), queryTime, "10 D", "1 min", "TRADES", 1, 1, false, null);
-
-            /******
             var splittedAccounts = accountsList.Split(',').Where(e => e.Length > 0).ToList();
 
             splittedAccounts.ForEach(account =>
@@ -278,7 +215,6 @@ namespace IBTradeBot
             clientSocket.reqMarketDataType(1);
             clientSocket.reqAllOpenOrders();
             clientSocket.reqIds(-1);
-            ******/
         }
 
         public override void pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL)
